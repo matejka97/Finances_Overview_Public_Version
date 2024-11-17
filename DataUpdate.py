@@ -6,8 +6,8 @@ import json
 
 def clean_datetime_string(date_time_string):
     """
-    Remove the decimal part from the seconds in the datetime string to ensure proper formatting 
-    for conversion to datetime.
+    Remove the decimal part from the seconds in the datetime string 
+    to ensure proper formatting for conversion to datetime.
 
     Parameters:
     date_time_string (str): The datetime string to clean.
@@ -20,14 +20,13 @@ def clean_datetime_string(date_time_string):
     """
     if not isinstance(date_time_string, str):
         raise ValueError("Input must be a string")
-    
     cleaned_string = re.sub(r'\.\d+', '', date_time_string)
     return cleaned_string
 
 def update_dataframe(main_df, new_df):
     """
-    Update the main dataframe with new data from another dataframe. Ensures that datetime columns
-    are properly formatted and merged.
+    Update the main dataframe with new data from another dataframe.
+    Ensures that datetime columns are properly formatted and merged.
 
     Parameters:
     main_df (pd.DataFrame): The main dataframe to be updated.
@@ -78,107 +77,116 @@ def update_dataframe(main_df, new_df):
 
 def update_main_csv(origin_csv_file, path_to_csv_files):
     """
-    Update the main CSV file using other CSV files from a specified directory. Ensures that all
-    datetime columns are properly formatted and merged.
+    Update the main CSV file using other CSV files from 
+    a specified directory. Ensures that all datetime columns 
+    are properly formatted and merged.
 
     Parameters:
     origin_csv_file (str): Path to the main CSV file.
-    path_to_csv_files (str): Path to the directory containing the CSV files to merge.
+    path_to_csv_files (str): Path to the directory containing
+    the CSV files to merge.
 
     Returns:
     None
 
     Raises:
-    FileNotFoundError: If the origin CSV file or directory of CSV files does not exist.
-    ValueError: If there is an error in reading or processing the CSV files.
+    FileNotFoundError: If the origin CSV file or directory of 
+    CSV files does not exist.ValueError: If there is an error in 
+    reading or processing the CSV files.
     """
     try:
         # Check if the main CSV file exists
         if not os.path.isfile(origin_csv_file):
-            raise FileNotFoundError(f"Origin CSV file '{origin_csv_file}' does not exist.")
-
+            raise FileNotFoundError(f"Origin CSV file " +
+                                    "'{origin_csv_file}'" +
+                                    "does not exist.")
         # Check if the directory containing the CSV files exists
         if not os.path.isdir(path_to_csv_files):
-            raise FileNotFoundError(f"Directory '{path_to_csv_files}' does not exist.")
-
+            raise FileNotFoundError(f"Directory " +
+                                    "'{path_to_csv_files}'" +
+                                    "does not exist.")
         # Get list of all CSV files in the specified directory
         path = os.path.join(path_to_csv_files, '*.csv')
         csv_files = glob.glob(path)
-
         # Read the main CSV file
         main = pd.read_csv(origin_csv_file)
-
         # Update the main dataframe with each new CSV file
         for file in csv_files:
             new = pd.read_csv(file)
             main = update_dataframe(main, new)
-
         # Save the updated main dataframe back to the CSV file
         main.to_csv(origin_csv_file, index=False)
-        print(f"Main CSV file '{origin_csv_file}' has been updated.")
+        print(f"Main CSV file '{origin_csv_file}' "+
+              "has been updated.")
     except Exception as e:
-        raise ValueError(f"An error occurred while updating the main CSV file: {e}")
+        raise ValueError(f"An error occurred while" +
+                         "updating the main CSV file: {e}")
 
 def total_deposit(df):
     """
-    Calculate the total deposit amount from a Trading212 app dataframe.
+    Calculate the total deposit amount from a Trading212 app 
+    dataframe.
 
     Parameters:
-    df (pd.DataFrame): DataFrame containing trading data with at least 'Action' and 'Total' columns.
+    df (pd.DataFrame): DataFrame containing trading data with 
+    at least 'Action' and 'Total' columns.
 
     Returns:
     float: The total deposit amount.
 
     Raises:
-    ValueError: If the required columns are not present in the DataFrame.
+    ValueError: If the required columns are not present in
+     the DataFrame.
     """
     # Check if the required columns are present in the DataFrame
     if 'Action' not in df.columns or 'Total' not in df.columns:
-        raise ValueError("DataFrame must contain 'Action' and 'Total' columns.")
-
-    # Filter the DataFrame to include only rows where the 'Action' is 'Deposit'
+        raise ValueError("DataFrame must contain " +
+                         "'Action' and 'Total' columns.")
+    # Filter the DataFrame to include only rows where the
+    # 'Action' is 'Deposit'
     deposit_df = df[df['Action'] == 'Deposit']['Total']
-
     # Calculate the total deposit amount
     total_deposit = deposit_df.sum()
-
     return total_deposit
 
 def total_withdrawal(df):
     """
-    Calculate the total deposit amount from a Trading212 app dataframe.
+    Calculate the total deposit amount from a Trading212 
+    app dataframe.
 
     Parameters:
-    df (pd.DataFrame): DataFrame containing trading data with at least 'Action' and 'Total' columns.
+    df (pd.DataFrame): DataFrame containing trading data 
+    with at least 'Action' and 'Total' columns.
 
     Returns:
     float: The total deposit amount.
 
     Raises:
-    ValueError: If the required columns are not present in the DataFrame.
+    ValueError: If the required columns are not present 
+    in the DataFrame.
     """
     # Check if the required columns are present in the DataFrame
     if 'Action' not in df.columns or 'Total' not in df.columns:
-        raise ValueError("DataFrame must contain 'Action' and 'Total' columns.")
-
-    # Filter the DataFrame to include only rows where the 'Action' is 'Deposit'
+        raise ValueError("DataFrame must contain" +
+                          "'Action' and 'Total' columns.")
+    # Filter the DataFrame to include only rows where
+    # the 'Action' is 'Deposit'
     withdrawal_df = df[df['Action'] == 'Withdrawal']['Total']
-
     # Calculate the total deposit amount
     total_withdrawal = withdrawal_df.sum()
-
     return total_withdrawal
-
 
 def correct_ticker_for_yfinance(ticker):
     """
-    Correct known issues with ticker symbols for use with yfinance.
+    Correct known issues with ticker symbols for use with 
+    yfinance.
 
     Parameters:
     ticker (str): The original ticker symbol.
 
     Returns:
-    str: The corrected ticker symbol if it exists in known_issues, else the original ticker symbol.
+    str: The corrected ticker symbol if it exists in 
+    known_issues, else the original ticker symbol.
     """
     known_issues = {
         'BRK.B': 'BRK-B',
@@ -198,24 +206,24 @@ def correct_ticker_for_yfinance(ticker):
         "TEP":"TEP.L",
         "RIO":"RIO.L"
     }
-
     # Check if the ticker needs correction
     if ticker in known_issues:
         corrected_ticker = known_issues[ticker]
     else:
         corrected_ticker = ticker
-
     return corrected_ticker
 
 def check_known_stocksplit(ticker):
     """
-    Retrieve known stock split event details for a given ticker.
+    Retrieve known stock split event details for 
+    a given ticker.
 
     Parameters:
     ticker (str): The stock ticker symbol.
 
     Returns:
-    tuple: A tuple containing the stock split date (as a datetime object) and the stock split ratio.
+    tuple: A tuple containing the stock split date 
+    (as a datetime object) and the stock split ratio.
 
     Raises:
     ValueError: If the ticker is not a string.
@@ -223,22 +231,23 @@ def check_known_stocksplit(ticker):
     known_stock_splits = {
         'NVDA': {'date': '2024-06-10 00:00:00', 'ratio': 10}
     }
-
     if ticker in known_stock_splits:
         stock_split_date = pd.to_datetime(known_stock_splits[ticker]['date'])
         stock_split_ratio = known_stock_splits[ticker]['ratio']
     else:
         stock_split_date = pd.to_datetime('2000-01-01 00:00:00')
         stock_split_ratio = 1
-
     return stock_split_date, stock_split_ratio
 
 def update_stock_dict(df):
     """
-    Update the actual number of shares and titles in the account based on trading actions.
+    Update the actual number of shares and titles
+    in the account based on trading actions.
 
     Parameters:
-    df (pd.DataFrame): DataFrame containing trading data with at least 'Action', 'Ticker', 'No. of shares', and 'Time' columns.
+    df (pd.DataFrame): DataFrame containing trading
+    data with at least 'Action', 'Ticker',
+    'No. of shares', and 'Time' columns.
 
     Returns:
     None
@@ -263,27 +272,22 @@ def update_stock_dict(df):
         # Initialize total shares
         total_shares = 0
         split_date, split_ratio = check_known_stocksplit(ticker)
-        
         # Process each row for the current ticker
-        for _, row in df[(df['Ticker'] == ticker) & (df['Action'].isin(['Market buy', 'Market sell']))].iterrows():
+        for _, row in df[(df['Ticker'] == ticker) &
+                         (df['Action'].isin(['Market buy', 'Market sell']))
+                         ].iterrows():
             action = row['Action']
             no_of_shares = row['No. of shares']
             transaction_time = row['Time']
-
             # Adjust for stock splits for transactions after the split date
             if transaction_time <= split_date:
                 no_of_shares *= split_ratio
-            
             if action == 'Market buy':
                 total_shares += no_of_shares
-
             elif action == 'Market sell':
                 total_shares -= no_of_shares
-
-
         if total_shares > 5e-6:
             Stock_Dict[correct_ticker_for_yfinance(ticker)] = total_shares
-
     with open('Stock_Dict.json', 'w') as file:
         # Save dictionary into JSON
         json.dump(Stock_Dict, file, ensure_ascii=False, indent=4)
@@ -309,20 +313,20 @@ def market_sell_total(df, start_date_time, end_date_time):
     for col in required_columns:
         if col not in df.columns:
             raise ValueError(f"DataFrame must contain '{col}' column.")
-    
     # Convert 'Time' column to datetime
     df['Time'] = pd.to_datetime(df['Time'], errors='coerce')
     if df['Time'].isna().any():
-        raise ValueError("Some dates in 'Time' column could not be converted to datetime.")
-    
+        raise ValueError("Some dates in 'Time' column could"
+                         +" not be converted to datetime.")
     # Convert start_date_time and end_date_time to datetime
     start_date_time = pd.to_datetime(start_date_time, errors='coerce')
     end_date_time = pd.to_datetime(end_date_time, errors='coerce')
     if pd.isna(start_date_time) or pd.isna(end_date_time):
-        raise ValueError("start_date_time and end_date_time must be valid datetime strings or datetime objects.")
-    
-    total_sells = df[(df['Action'] == 'Market sell') & (df['Time'] >= start_date_time) & (df['Time'] <= end_date_time)]['Total'].sum()
-
+        raise ValueError("start_date_time and end_date_time must be valid datetime" +
+                         "strings or datetime objects.")
+    total_sells = df[(df['Action'] == 'Market sell') &
+                     (df['Time'] >= start_date_time) &
+                     (df['Time'] <= end_date_time)]['Total'].sum()
     return total_sells
 
 def market_buy_total(df, start_date_time, end_date_time):
@@ -344,28 +348,29 @@ def market_buy_total(df, start_date_time, end_date_time):
     for col in required_columns:
         if col not in df.columns:
             raise ValueError(f"DataFrame must contain '{col}' column.")
-    
     # Convert 'Time' column to datetime
     df['Time'] = pd.to_datetime(df['Time'], errors='coerce')
     if df['Time'].isna().any():
         raise ValueError("Some dates in 'Time' column could not be converted to datetime.")
-    
     # Convert start_date_time and end_date_time to datetime
     start_date_time = pd.to_datetime(start_date_time, errors='coerce')
     end_date_time = pd.to_datetime(end_date_time, errors='coerce')
     if pd.isna(start_date_time) or pd.isna(end_date_time):
-        raise ValueError("start_date_time and end_date_time must be valid datetime strings or datetime objects.")
-    
-    total_buys = df[(df['Action'] == 'Market buy') & (df['Time'] >= start_date_time) & (df['Time'] <= end_date_time)]['Total'].sum()
-
+        raise ValueError("start_date_time and end_date_time must" +
+                        "be valid datetime strings or datetime objects.")
+    total_buys = df[(df['Action'] == 'Market buy') &
+                    (df['Time'] >= start_date_time) &
+                    (df['Time'] <= end_date_time)]['Total'].sum()
     return total_buys
 
 def trading_result(df, start_date_time, end_date_time):
     """
-    Returns the net result (gain or loss) in CZK from trading operations for a specific time window.
+    Returns the net result (gain or loss) in CZK from trading operations 
+    for a specific time window.
 
     Parameters:
-    df (pd.DataFrame): DataFrame containing trading data with 'Action', 'Time', 'Total', and 'Result' columns.
+    df (pd.DataFrame): DataFrame containing trading data with 'Action', 
+    'Time', 'Total', and 'Result' columns.
     start_date_time (str or datetime): The start of the time window.
     end_date_time (str or datetime): The end of the time window.
 
@@ -373,27 +378,25 @@ def trading_result(df, start_date_time, end_date_time):
     float: Net result (gain or loss) in CZK for the specified time window.
 
     Raises:
-    ValueError: If the required columns are not present in the DataFrame or if there is an error in calculating the trading result.
+    ValueError: If the required columns are not present in the DataFrame or
+    if there is an error in calculating the trading result.
     """
     required_columns = ['Action', 'Time', 'Total', 'Result']
     for col in required_columns:
         if col not in df.columns:
             raise ValueError(f"DataFrame must contain '{col}' column.")
-    
     # Convert 'Time' column to datetime
     df['Time'] = pd.to_datetime(df['Time'], errors='coerce')
     if df['Time'].isna().any():
         raise ValueError("Some dates in 'Time' column could not be converted to datetime.")
-    
     # Convert start_date_time and end_date_time to datetime
     start_date_time = pd.to_datetime(start_date_time, errors='coerce')
     end_date_time = pd.to_datetime(end_date_time, errors='coerce')
     if pd.isna(start_date_time) or pd.isna(end_date_time):
         raise ValueError("start_date_time and end_date_time must be valid datetime strings or datetime objects.")
-    
     try:
-        result = df[(df['Action'] == 'Market sell') & 
-                    (df['Time'] >= start_date_time) & 
+        result = df[(df['Action'] == 'Market sell') &
+                    (df['Time'] >= start_date_time) &
                     (df['Time'] <= end_date_time)]['Result'].sum()
     except Exception as e:
         raise ValueError(f"Error calculating trading result: {e}")
@@ -421,9 +424,9 @@ def total_dividends(df):
     # Calculate total dividends
     try:
         div_total = df[df['Action'].isin([
-            'Dividend (Ordinary)', 
-            'Dividend (Dividends by us corporations)', 
-            'Dividend (Dividend)', 
+            'Dividend (Ordinary)',
+            'Dividend (Dividends by us corporations)',
+            'Dividend (Dividend)',
             'Dividend (Tax exempted)',
             'Dividend (Dividend manufactured payment)'
         ])]['Total'].sum()
@@ -453,7 +456,7 @@ def total_interest(df):
     # Calculate total interest
     try:
         int_total = df[df['Action'].isin([
-            'Lending interest', 
+            'Lending interest',
             'Interest on cash'
         ])]['Total'].sum()
     except Exception as e:
